@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from django.contrib.auth import authenticate, login, logout
 from .models import *
 from rest_framework.decorators import api_view
+from django.contrib.auth.decorators import login_required
 from rest_framework.response import Response
 from .serializer import MovieSerializer
+# from django.contrib.auth.models import User
 
 # Movie App Views
 def home(request):
@@ -56,6 +59,43 @@ def delete_movie(request, id):
         return redirect('get_movie')
     except Movies.DoesNotExist:
         return HttpResponse("Movie not found", status=404)
+
+    
+def create_user(request):
+    if request.method == "POST":
+        username = request.POST.get('username')
+        mobilenumber = request.POST.get('mobilenumber')
+        age = request.POST.get('age')
+        password = request.POST.get('password')
+
+        if User.objects.filter(username=username).exists():
+            return HttpResponse("Username already exists", status=400)
+        
+        user = User.objects.create_user(username=username, password=password, mobilenumber=mobilenumber, age=age)
+        user.save()
+        return HttpResponse("User created successfully", status=201)
+    else:
+        return render(request, 'create_user.html')
+
+def login_user(request):
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('profile')
+        else:
+            return HttpResponse("Invalid credentials", status=401)
+    return render(request, 'login_user.html')
+
+@login_required
+def profile(request):
+    return render(request, 'profile.html', {'user': request.user})
+
+def logout_user(request):
+    logout(request)
+    return redirect('login_user')
 
 
 @api_view(['POST'])
