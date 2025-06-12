@@ -69,6 +69,7 @@ TEMPLATES = [
     },
 ]
 
+LOGIN_URL = '/login_user/'
 AUTH_USER_MODEL = 'movieApp.User'
 WSGI_APPLICATION = 'movieProject.wsgi.application'
 

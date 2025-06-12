@@ -12,46 +12,71 @@ from .serializer import MovieSerializer
 def home(request):
     return render(request, 'home.html')
 
+@login_required
 def post_movie(request):
     if request.method == "POST":
-        name = request.POST.get('name')
-        language = request.POST.get('language')
-        rel_year = request.POST.get('rel_year')
-        genre = request.POST.get('genre')
-        hero = request.POST.get('hero')
-        heroine = request.POST.get('heroine')
-        rating = request.POST.get('rating')
-        runtime = request.POST.get('runtime')
-        movie = Movies.objects.create(name=name, language=language, rel_year=rel_year, genre=genre, hero=hero, heroine=heroine, imdb_rating=rating, runtime=runtime)
-        return redirect('get_movie')
+        serializer = MovieSerializer(data=request.POST)
+        if serializer.is_valid():
+            serializer.save()
+            return redirect('get_movie')
+        else:
+            return render(request, 'post_movies.html', {'errors': serializer.errors})
     return render(request, 'post_movies.html')
 
 def get_movie(request):
+    name = request.GET.get('name')
+    language = request.GET.get('language')
+    genre = request.GET.get('genre')
+    rel_year = request.GET.get('rel_year')
     movie = Movies.objects.all()
+    if name:
+        movie = movie.filter(name__icontains=name)
+    if language:
+        movie = movie.filter(language__icontains=language)
+    if genre:
+        movie = movie.filter(genre__icontains=genre)
+    if rel_year:
+        movie = movie.filter(rel_year=rel_year)
     context = {"movie":movie}
     return render(request, 'get_movies.html', context)
 
+@login_required
 def update_movie(request, id):
     try:
         movie = Movies.objects.get(id=id)
+
         if request.method == "POST":
-            movie.name = request.POST.get("name")
-            movie.language = request.POST.get("language")
-            movie.rel_year = request.POST.get("rel_year")
-            movie.genre = request.POST.get("genre")
-            movie.hero = request.POST.get("hero")
-            movie.heroine = request.POST.get("heroine")
-            movie.imdb_rating = request.POST.get("rating")
-            movie.runtime = request.POST.get("runtime")
-            movie.save()
-            return redirect('get_movie')
+            data = {
+                "name": request.POST.get("name"),
+                "language": request.POST.get("language"),
+                "rel_year": request.POST.get("rel_year"),
+                "genre": request.POST.get("genre"),
+                "hero": request.POST.get("hero"),
+                "heroine": request.POST.get("heroine"),
+                "imdb_rating": request.POST.get("imdb_rating"),
+                "runtime": request.POST.get("runtime"),
+            }
+
+            serializer = MovieSerializer(instance=movie, data=data)
+
+            if serializer.is_valid():
+                serializer.save()
+                return redirect('get_movie')
+            else:
+                return render(request, 'update_movies.html', {
+                    "movie": movie,
+                    "errors": serializer.errors,
+                    "form_data": data
+                })
+
         else:
-            context = {"movie":movie}
-            return render(request, 'update_movies.html', context)
+            return render(request, 'update_movies.html', {"movie": movie})
+
     except Movies.DoesNotExist:
         return HttpResponse("Movie not found", status=404)
 
 
+@login_required
 def delete_movie(request, id):
     try:
         movie = Movies.objects.get(id=id)

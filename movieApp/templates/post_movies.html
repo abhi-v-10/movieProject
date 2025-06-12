@@ -9,6 +9,20 @@
 <body>
     <h1 class="mt-5 text-center">Post Movies</h1>
 
+{% if errors %}
+  <div class="container mt-4">
+    <div class="alert alert-danger">
+      <h5 class="alert-heading">Validation Errors:</h5>
+      <ul class="mb-0">
+        {% for field, field_errors in errors.items %}
+          <li><strong>{{ field|capfirst }}:</strong> {{ field_errors.0 }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endif %}
+
+
 <form action="{% url 'post_movie' %}" method="post" class="p-4">
     {% csrf_token %}
   
@@ -42,7 +56,7 @@
     </div>
     <div class="col-md-3">
       <label for="rating" class="form-label">IMDB Rating</label>
-      <input type="text" class="form-control" id="rating" name="rating" placeholder="Enter IMDB Rating">
+      <input type="text" class="form-control" id="rating" name="imdb_rating" placeholder="Enter IMDB Rating">
     </div>
     <div class="col-md-3">
       <label for="runtime" class="form-label">Runtime (min)</label>
