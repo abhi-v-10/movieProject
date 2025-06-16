@@ -62,34 +62,36 @@
     </div>
   </div>
   <div class="mb-3">
-                <label for="movie_details" class="form-label">Movie Details</label>
-                <select class="form-select" id="movie_details" name="movie_details">
-                    <option value="">Select Details</option>
-                    {% for detail in details %}
-                        <option value="{{ detail.id }}">Budget: {{ detail.budget }}, Collection: {{ detail.collection }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+    <label for="movie_details" class="form-label">Movie Details</label>
+      <select class="form-select" id="movie_details" name="movie_details">
+      <option value="">Select Details</option>
+      {% for detail in details %}
+      <option value="{{ detail.id }}" {% if movie.movie_details.id == detail.id %}selected{% endif %}>
+        Budget: {{ detail.budget }}, Collection: {{ detail.collection }}
+      </option>
+      {% endfor %}
+      </select>
+  </div>
 
-            <div class="mb-3">
-                <label for="production" class="form-label">Production Company</label>
-                <select class="form-select" id="production" name="production">
-                    <option value="">Select Production</option>
-                    {% for prod in productions %}
-                        <option value="{{ prod.id }}">{{ prod.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+  <div class="mb-3">
+    <label for="production" class="form-label">Production Company</label>
+      <select class="form-select" id="production" name="production">
+      <option value="">Select Production</option>
+      {% for prod in productions %}
+      <option value="{{ prod.id }}" {% if movie.production.id == prod.id %}selected{% endif %}>{{ prod.name }}</option>
+      {% endfor %}
+      </select>
+  </div>
 
-            <div class="mb-4">
-                <label for="other_languages" class="form-label">Other Languages</label>
-                <select class="form-select" id="other_languages" name="other_languages" multiple>
-                    {% for lang in other_languages %}
-                        <option value="{{ lang.id }}">{{ lang.other_language }}</option>
-                    {% endfor %}
-                </select>
-                <div class="form-text">Hold Ctrl (Windows) or Command (Mac) to select multiple options.</div>
-            </div>
+  <div class="mb-4">
+    <label for="other_languages" class="form-label">Other Languages</label>
+      <select class="form-select" id="other_languages" name="other_languages" multiple>
+      {% for lang in other_languages %}
+      <option value="{{ lang.id }}" {% if lang in movie.other_languages.all %}selected{% endif %}>{{ lang.other_language }}</option>
+      {% endfor %}
+      </select>
+      <div class="form-text">Hold Ctrl (Windows) or Command (Mac) to select multiple options.</div>
+  </div>
 
   <div class="d-flex justify-content-center">
     <button type="submit" class="btn btn-primary px-5">Submit</button>

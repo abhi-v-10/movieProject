@@ -30,7 +30,7 @@ def post_movie(request):
         serializer = MovieSerializer(data=request.POST)
         if serializer.is_valid():
             serializer.save()
-            return redirect('get_movie')
+            return redirect('add_relations')
         else:
             return render(request, 'post_movies.html', {'errors': serializer.errors})
     return render(request, 'post_movies.html')
@@ -55,11 +55,13 @@ def get_movie(request):
 
 @permission_classes([IsAuthenticated])
 def update_movie(request, id):
-    details = MovieDetails.objects.all()
-    production = Production.objects.all()
-    other_languages = OtherLanguages.objects.all()
+    
     try:
+        details = MovieDetails.objects.all()
+        production = Production.objects.all()
+        other_languages = OtherLanguages.objects.all()
         movie = Movies.objects.get(id=id)
+        errors = {}
 
         if request.method == "POST":
             data = {
@@ -162,40 +164,7 @@ def logout_user(request):
 def profile(request):
     return render(request, 'profile.html', {'user': request.user})
 
-
-# def add_relations(request):
-#     details = MovieDetails.objects.all()
-#     production = Production.objects.all()
-#     other_languages = OtherLanguages.objects.all()
-#     context = {
-#         "details": details,
-#         "productions": production,
-#         "other_languages": other_languages
-#     }
-#     if request.method == "POST":
-#         movie_id = request.POST.get("movie_id")
-#         details_id = request.POST.get("details_id")
-#         print(details_id)
-#         production_id = request.POST.get("production_id")
-#         other_languages_ids = request.POST.getlist("other_languages_ids")
-
-#         try:
-#             movie = Movies.objects.get(id=movie_id)
-#             if details_id:
-#                 movie.movie_details_id = details_id
-#             if production_id:
-#                 movie.production_id = production_id
-#             if other_languages_ids:
-#                 movie.other_languages.set(OtherLanguages.objects.filter(id__in=other_languages_ids))
-#             movie.save()
-
-#             messages.success(request, "Relationships updated successfully.")
-#         except Movies.DoesNotExist:
-#             messages.error(request, "Movie not found.")
-#         except Exception as e:
-#             messages.error(request, f"An error occurred: {str(e)}")
-#     return render(request, 'relationships.html',context)
-
+@permission_classes([IsAuthenticated])
 def add_relations(request):
     if request.method == "POST":
         budget = request.POST.get('budget')
@@ -204,11 +173,12 @@ def add_relations(request):
         other_languages_str = request.POST.get('other_languages')
 
         # Save MovieDetails
-        MovieDetails.objects.create(budget=budget, collection=collection)
+        if budget and collection:
+            MovieDetails.objects.create(budget=budget, collection=collection)
 
-        # Save Production
-        Production.objects.create(name=production_name)
-        return redirect('get_movie')  # Replace with your homepage/movie list page
+        if production_name.strip():
+            Production.objects.create(name=production_name)
+        return redirect('get_movie')
     return render(request, 'relationships.html')
 
 # API Views
