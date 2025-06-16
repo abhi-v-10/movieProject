@@ -122,7 +122,7 @@ Visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser.
 - **Update Movie:** `PUT /api_update_movie/<id>`
 - **Delete Movie:** `DELETE /api_delete_movie/<id>`
 
-All API endpoints use JSON and are implemented in [`views.py`](movieApp/views.py).
+All API endpoints use JSON and are implemented in [`movieApp/views.py`](movieApp/views.py).
 
 ---
 
@@ -132,7 +132,7 @@ The project uses a custom user model (`User`) with additional fields:
 - `mobilenumber`
 - `age`
 
-See [`models.py`](movieApp/models.py).
+See [`movieApp/models.py`](movieApp/models.py).
 
 ---
 
@@ -148,6 +148,7 @@ Manage users and movies from the admin interface.
 - Django
 - djangorestframework
 - Bootstrap (via CDN for frontend)
+- [requirements.txt](./requirements.txt)
 
 ---
 

@@ -1,37 +1,81 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create User</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create User</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1 class="mt-5 text-center">Create User</h1>
+  <div class="container mt-5">
+    <h1 class="text-center mb-4">Create User</h1>
 
-    <form action="{% url 'create_user' %}" method="post" class="p-4">
-        {% csrf_token %}
-        <div class="row mb-3">
-            <div class="col-md-3">
-            <label for="name" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" autocomplete="off" name="username" placeholder="Enter Username">
-            </div>
-            <div class="col-md-3">
-            <label for="language" class="form-label">Password</label>
-            <input type="password" class="form-control" id="password" autocomplete="new-password" name="password" placeholder="Enter Password">
-            </div>
-            <div class="col-md-3">
-            <label for="language" class="form-label">Mobile Number</label>
-            <input type="text" class="form-control" id="mobilenumber" autocomplete="off" name="mobilenumber" placeholder="Enter Mobile Number">
-            </div>
-            <div class="col-md-3">
-            <label for="language" class="form-label">Age</label>
-            <input type="text" class="form-control" id="age" autocomplete="off" name="age" placeholder="Enter Age">
-            </div>
+    {% if errors %}
+      <div class="alert alert-danger">
+        <h5 class="alert-heading">Please correct the following errors:</h5>
+        <ul class="mb-0">
+          {% for field, field_errors in errors.items %}
+            <li><strong>{{ field|capfirst }}:</strong> {{ field_errors.0 }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <form action="{% url 'create_user' %}" method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+
+        <!-- Username -->
+        <div class="col-md-3">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" class="form-control {% if errors.username %}is-invalid{% endif %}"
+                 id="username" name="username" value="{{ data.username|default:'' }}" placeholder="Enter Username" autocomplete="off">
+          {% if errors.username %}
+            <div class="invalid-feedback d-block">{{ errors.username.0 }}</div>
+          {% endif %}
         </div>
-        
-        <div class="d-flex justify-content-center">
-            <button type="submit" class="btn btn-primary px-5">Submit</button>
+
+        <!-- Password -->
+        <div class="col-md-3">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" class="form-control {% if errors.password %}is-invalid{% endif %}"
+                 id="password" name="password" placeholder="Enter Password" autocomplete="new-password">
+          {% if errors.password %}
+            <div class="invalid-feedback d-block">{{ errors.password.0 }}</div>
+          {% endif %}
         </div>
+
+        <!-- Mobile Number -->
+        <div class="col-md-3">
+          <label for="mobilenumber" class="form-label">Mobile Number</label>
+          <input type="text" class="form-control {% if errors.mobilenumber %}is-invalid{% endif %}"
+                 id="mobilenumber" name="mobilenumber" value="{{ data.mobilenumber|default:'' }}" placeholder="Enter Mobile Number" autocomplete="off">
+          {% if errors.mobilenumber %}
+            <div class="invalid-feedback d-block">{{ errors.mobilenumber.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Age -->
+        <div class="col-md-3">
+          <label for="age" class="form-label">Age</label>
+          <input type="text" class="form-control {% if errors.age %}is-invalid{% endif %}"
+                 id="age" name="age" value="{{ data.age|default:'' }}" placeholder="Enter Age" autocomplete="off">
+          {% if errors.age %}
+            <div class="invalid-feedback d-block">{{ errors.age.0 }}</div>
+          {% endif %}
+        </div>
+
+      </div>
+
+      <div class="d-flex justify-content-center mt-4">
+        <button type="submit" class="btn btn-primary px-5">Submit</button>
+      </div>
     </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+
 </body>

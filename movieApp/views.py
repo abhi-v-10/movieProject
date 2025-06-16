@@ -1,18 +1,30 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from django.contrib.auth import authenticate, login, logout
+from rest_framework import status
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from .models import *
 from rest_framework.decorators import api_view
 from django.contrib.auth.decorators import login_required
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from .serializer import MovieSerializer
+from .serializer import *
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework_simplejwt.tokens import RefreshToken
 # from django.contrib.auth.models import User
+
+
+class CustomPairView(TokenObtainPairView):
+    serializer_class = CustomTokenSerializer
 
 # Movie App Views
 def home(request):
     return render(request, 'home.html')
 
-@login_required
+@permission_classes([IsAuthenticated])
 def post_movie(request):
     if request.method == "POST":
         serializer = MovieSerializer(data=request.POST)
@@ -23,6 +35,7 @@ def post_movie(request):
             return render(request, 'post_movies.html', {'errors': serializer.errors})
     return render(request, 'post_movies.html')
 
+@permission_classes([AllowAny])
 def get_movie(request):
     name = request.GET.get('name')
     language = request.GET.get('language')
@@ -40,8 +53,11 @@ def get_movie(request):
     context = {"movie":movie}
     return render(request, 'get_movies.html', context)
 
-@login_required
+@permission_classes([IsAuthenticated])
 def update_movie(request, id):
+    details = MovieDetails.objects.all()
+    production = Production.objects.all()
+    other_languages = OtherLanguages.objects.all()
     try:
         movie = Movies.objects.get(id=id)
 
@@ -55,6 +71,9 @@ def update_movie(request, id):
                 "heroine": request.POST.get("heroine"),
                 "imdb_rating": request.POST.get("imdb_rating"),
                 "runtime": request.POST.get("runtime"),
+                "movie_details": request.POST.get("movie_details"),
+                "production": request.POST.get("production"),
+                "other_languages": request.POST.getlist("other_languages")
             }
 
             serializer = MovieSerializer(instance=movie, data=data)
@@ -65,18 +84,26 @@ def update_movie(request, id):
             else:
                 return render(request, 'update_movies.html', {
                     "movie": movie,
+                    "details": details,
+                    "productions": production,
+                    "other_languages": other_languages,
                     "errors": serializer.errors,
                     "form_data": data
                 })
 
         else:
-            return render(request, 'update_movies.html', {"movie": movie})
+            return render(request, 'update_movies.html',
+             {
+                "movie": movie, "details": details,
+                "productions": production,
+                "other_languages": other_languages
+            })
 
     except Movies.DoesNotExist:
         return HttpResponse("Movie not found", status=404)
 
 
-@login_required
+@permission_classes([IsAuthenticated])
 def delete_movie(request, id):
     try:
         movie = Movies.objects.get(id=id)
@@ -85,22 +112,32 @@ def delete_movie(request, id):
     except Movies.DoesNotExist:
         return HttpResponse("Movie not found", status=404)
 
-    
+# User Authentication Views 
+
 def create_user(request):
     if request.method == "POST":
-        username = request.POST.get('username')
-        mobilenumber = request.POST.get('mobilenumber')
-        age = request.POST.get('age')
-        password = request.POST.get('password')
+        data = {
+            "username": request.POST.get("username", ""),
+            "password": request.POST.get("password", ""),
+            "mobilenumber": request.POST.get("mobilenumber", ""),
+            "age": request.POST.get("age", "")
+        }
 
-        if User.objects.filter(username=username).exists():
-            return HttpResponse("Username already exists", status=400)
+        serializer = UserSerializer(data=data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return redirect('login_user')
+        else:
+            return render(request, "create_user.html", {
+                "errors": serializer.errors,
+                "data": data
+            })
+
+    return render(request, "create_user.html", {
+        "data": {}
+    })
         
-        user = User.objects.create_user(username=username, password=password, mobilenumber=mobilenumber, age=age)
-        user.save()
-        return HttpResponse("User created successfully", status=201)
-    else:
-        return render(request, 'create_user.html')
 
 def login_user(request):
     if request.method == "POST":
@@ -114,14 +151,67 @@ def login_user(request):
             return HttpResponse("Invalid credentials", status=401)
     return render(request, 'login_user.html')
 
-@login_required
-def profile(request):
-    return render(request, 'profile.html', {'user': request.user})
 
+
+@permission_classes([IsAuthenticated])
 def logout_user(request):
     logout(request)
     return redirect('login_user')
 
+@permission_classes([IsAuthenticated])
+def profile(request):
+    return render(request, 'profile.html', {'user': request.user})
+
+
+# def add_relations(request):
+#     details = MovieDetails.objects.all()
+#     production = Production.objects.all()
+#     other_languages = OtherLanguages.objects.all()
+#     context = {
+#         "details": details,
+#         "productions": production,
+#         "other_languages": other_languages
+#     }
+#     if request.method == "POST":
+#         movie_id = request.POST.get("movie_id")
+#         details_id = request.POST.get("details_id")
+#         print(details_id)
+#         production_id = request.POST.get("production_id")
+#         other_languages_ids = request.POST.getlist("other_languages_ids")
+
+#         try:
+#             movie = Movies.objects.get(id=movie_id)
+#             if details_id:
+#                 movie.movie_details_id = details_id
+#             if production_id:
+#                 movie.production_id = production_id
+#             if other_languages_ids:
+#                 movie.other_languages.set(OtherLanguages.objects.filter(id__in=other_languages_ids))
+#             movie.save()
+
+#             messages.success(request, "Relationships updated successfully.")
+#         except Movies.DoesNotExist:
+#             messages.error(request, "Movie not found.")
+#         except Exception as e:
+#             messages.error(request, f"An error occurred: {str(e)}")
+#     return render(request, 'relationships.html',context)
+
+def add_relations(request):
+    if request.method == "POST":
+        budget = request.POST.get('budget')
+        collection = request.POST.get('collection')
+        production_name = request.POST.get('production_name')
+        other_languages_str = request.POST.get('other_languages')
+
+        # Save MovieDetails
+        MovieDetails.objects.create(budget=budget, collection=collection)
+
+        # Save Production
+        Production.objects.create(name=production_name)
+        return redirect('get_movie')  # Replace with your homepage/movie list page
+    return render(request, 'relationships.html')
+
+# API Views
 
 @api_view(['POST'])
 def api_post_movie(request):
@@ -162,6 +252,42 @@ def api_delete_movie(request, id):
         except Movies.DoesNotExist:
             return Response({"message": "Movie not found"}, status=404)
 
+@api_view(['POST'])
+def api_create_user(request):
+    serializer = UserSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message": "User created successfully"}, status=201)
 
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def api_register(request):    
+    serializer = UserSerializer(data=request.data)    
+    serializer.is_valid(raise_exception=True)    
+    serializer.save()    
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def api_view_token(request):
+    serializer = TokenObtainPairSerializer(data=request.data)
+    try:
+        serializer.is_valid(raise_exception=True)
+    except TokenError as e:
+        raise InvalidToken(e.args[0])
+    return Response(serializer.validated_data, status=200)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_test_token(request):
+    return Response({"message": "Token is valid"}, status=200)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_logout(request):
+    refresh_token = request.data.get('refresh_token')
+    token = RefreshToken(refresh_token)
+    token.blacklist()
+    return Response({"message": "Logged out successfully"}, status=205)
