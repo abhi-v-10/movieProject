@@ -12,6 +12,7 @@ MovieProject is a Django-based web application for managing a collection of movi
 - REST API endpoints for CRUD operations on movies
 - Bootstrap-based responsive UI
 - Admin interface for managing users and movies
+- Demonstrates Django model relationships: One-to-One, One-to-Many, Many-to-Many
 
 ---
 
@@ -40,7 +41,8 @@ movieProject/
 │   │   ├── login_user.html
 │   │   ├── post_movies.html
 │   │   ├── profile.html
-│   │   └── update_movies.html
+│   │   ├── update_movies.html
+│   │   └── relationships.html
 │   ├── tests.py
 │   ├── urls.py
 │   ├── views.py
@@ -65,13 +67,16 @@ cd movieProject
 
 ```sh
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
 ```
 
 ### 3. Install Dependencies
 
 ```sh
-pip install django djangorestframework
+pip install django djangorestframework djangorestframework-simplejwt
 ```
 
 ### 4. Apply Migrations
@@ -112,17 +117,41 @@ Visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser.
   - View: `/get_movie/`
   - Update: `/update_movie/<id>`
   - Delete: `/delete_movie/<id>`
+- **Add Related Data:** `/add_relations/`  
+  Add movie details, production, and languages.
 
 ---
 
 ## 🔗 API Endpoints
 
-- **List Movies:** `GET /api_get_movie/`
-- **Add Movie:** `POST /api_post_movie/`
-- **Update Movie:** `PUT /api_update_movie/<id>`
-- **Delete Movie:** `DELETE /api_delete_movie/<id>`
-
 All API endpoints use JSON and are implemented in [`movieApp/views.py`](movieApp/views.py).
+
+| Method | Endpoint                        | Description                       |
+|--------|---------------------------------|-----------------------------------|
+| GET    | `/api_get_movie/`               | List all movies                   |
+| POST   | `/api_post_movie/`              | Add a new movie                   |
+| PUT    | `/api_update_movie/<id>`        | Update a movie                    |
+| DELETE | `/api_delete_movie/<id>`        | Delete a movie                    |
+| POST   | `/api_create_user/`             | Create a new user                 |
+| POST   | `/api_register/`                | Register a new user (API)         |
+| POST   | `/api_view_token/`              | Obtain JWT token                  |
+| GET    | `/api_test_token/`              | Test JWT token validity           |
+| POST   | `/api_logout/`                  | Logout and blacklist refresh token|
+| POST   | `/create_token/`                | Obtain JWT token (SimpleJWT)      |
+| POST   | `/refresh_token/`               | Refresh JWT token (SimpleJWT)     |
+| POST   | `/refresh_custom_token/`        | Custom JWT token refresh          |
+
+---
+
+## 🧩 Models & Relationships
+
+See [`movieApp/models.py`](movieApp/models.py).
+
+- **Movies**: Main movie model with fields for name, language, year, genre, hero, heroine, rating, runtime, and relationships.
+- **MovieDetails**: One-to-One with Movies (budget, collection).
+- **Production**: One-to-Many with Movies (production house).
+- **OtherLanguages**: Many-to-Many with Movies (other languages).
+- **User**: Custom user model with `mobilenumber` and `age`.
 
 ---
 
@@ -131,8 +160,6 @@ All API endpoints use JSON and are implemented in [`movieApp/views.py`](movieApp
 The project uses a custom user model (`User`) with additional fields:
 - `mobilenumber`
 - `age`
-
-See [`movieApp/models.py`](movieApp/models.py).
 
 ---
 
@@ -147,6 +174,7 @@ Manage users and movies from the admin interface.
 
 - Django
 - djangorestframework
+- djangorestframework-simplejwt
 - Bootstrap (via CDN for frontend)
 - [requirements.txt](./requirements.txt)
 
@@ -162,4 +190,3 @@ This project is for educational and personal use.
 
 - [Django Documentation](https://docs.djangoproject.com/)
 - [Django REST Framework](https://www.django-rest-framework.org/)
-- [Bootstrap](https://getbootstrap.com/)
