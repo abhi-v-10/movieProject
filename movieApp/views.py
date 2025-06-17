@@ -14,6 +14,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
+from .forms import *
 # from django.contrib.auth.models import User
 
 
@@ -180,6 +181,18 @@ def add_relations(request):
             Production.objects.create(name=production_name)
         return redirect('get_movie')
     return render(request, 'relationships.html')
+
+# ModelForm Views
+def add_user(request):
+    if request.method == "POST":
+        form = UserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = UserForm()
+    return render(request, 'user_form.html', {'form': form})
+
 
 # API Views
 

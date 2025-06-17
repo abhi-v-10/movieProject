@@ -22,6 +22,7 @@ urlpatterns = [
     path('login_user/', views.login_user, name="login_user"),
     path('logout_user/', views.logout_user, name='logout_user'),
     path('profile/', views.profile, name='profile'),
+    path('add_user/', views.add_user, name='add_user'),
 
     path("api_post_movie/", views.api_post_movie, name="api_post"),
     path("api_get_movie/", views.api_get_movie, name="api_get_movie"),
