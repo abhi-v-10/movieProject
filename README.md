@@ -42,7 +42,14 @@ movieProject/
 │   │   ├── post_movies.html
 │   │   ├── profile.html
 │   │   ├── update_movies.html
-│   │   └── relationships.html
+│   │   ├── relationships.html
+│   │   ├── user_form.html
+│   │   ├── watchlist.html
+│   │   └── edit_user.html
+│   │   
+│   │      
+│   │   
+│   │ 
 │   ├── tests.py
 │   ├── urls.py
 │   ├── views.py
@@ -117,6 +124,7 @@ Visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser.
   - View: `/get_movie/`
   - Update: `/update_movie/<id>`
   - Delete: `/delete_movie/<id>`
+  - Watchlist: `/watchlist/`
 - **Add Related Data:** `/add_relations/`  
   Add movie details, production, and languages.
 
@@ -152,6 +160,7 @@ See [`movieApp/models.py`](movieApp/models.py).
 - **Production**: One-to-Many with Movies (production house).
 - **OtherLanguages**: Many-to-Many with Movies (other languages).
 - **User**: Custom user model with `mobilenumber` and `age`.
+- **Watchlist**: Contains user liked movies.
 
 ---
 
