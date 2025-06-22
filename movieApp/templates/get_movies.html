@@ -79,6 +79,12 @@
               {% endfor %}
             </td>
             <td>
+              {% if user in i.liked_by.all %}
+                <a href="{% url 'like_movie' i.id %}" class="btn btn-sm btn-outline-danger mb-1">Unlike</a>
+              {% else %}
+                <a href="{% url 'like_movie' i.id %}" class="btn btn-sm btn-outline-success mb-1">Like</a>
+              {% endif %}
+  
               <a href="{% url 'update_movie' i.id %}" class="btn btn-sm btn-primary mb-1">Edit</a>
               <a href="{% url 'delete_movie' i.id %}" class="btn btn-sm btn-danger">Delete</a>
             </td>
@@ -87,6 +93,12 @@
         </tbody>
       </table>
     </div>
+    <div class="d-flex justify-content-between my-3">
+  <a href="{% url 'home' %}" class="btn btn-md btn-success">Home</a>
+  <a href="{% url 'watchlist' %}" class="btn btn-sm btn-primary">Watchlist</a>
+  <a href="{% url 'post_movie' %}" class="btn btn-md btn-warning">Add Movies</a>
+</div>
+
   </div>
 </body>
 </html>

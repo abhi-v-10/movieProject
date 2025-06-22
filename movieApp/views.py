@@ -15,7 +15,6 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from .forms import *
-# from django.contrib.auth.models import User
 
 
 class CustomPairView(TokenObtainPairView):
@@ -25,7 +24,8 @@ class CustomPairView(TokenObtainPairView):
 def home(request):
     return render(request, 'home.html')
 
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
+@login_required
 def post_movie(request):
     if request.method == "POST":
         serializer = MovieSerializer(data=request.POST)
@@ -122,6 +122,7 @@ def create_user(request):
         data = {
             "username": request.POST.get("username", ""),
             "password": request.POST.get("password", ""),
+            "email": request.POST.get("email", ""),
             "mobilenumber": request.POST.get("mobilenumber", ""),
             "age": request.POST.get("age", "")
         }
@@ -166,6 +167,25 @@ def profile(request):
     return render(request, 'profile.html', {'user': request.user})
 
 @permission_classes([IsAuthenticated])
+def edit_user(request):
+    user = request.user
+
+    if request.method == 'POST':
+        mobilenumber = request.POST.get('mobilenumber', '')
+        age = request.POST.get('age', '')
+
+        user.mobilenumber = mobilenumber
+        user.age = age
+        user.save()
+
+        return redirect('profile')
+
+    return render(request, 'edit_user.html', {
+        'mobilenumber': user.mobilenumber or '',
+        'age': user.age or '',
+    })
+
+@permission_classes([IsAuthenticated])
 def add_relations(request):
     if request.method == "POST":
         budget = request.POST.get('budget')
@@ -181,6 +201,35 @@ def add_relations(request):
             Production.objects.create(name=production_name)
         return redirect('get_movie')
     return render(request, 'relationships.html')
+
+@login_required
+def like_movie(request, movie_id):
+    try:
+        movie = Movies.objects.get(id=movie_id)
+
+        if request.user in movie.liked_by.all():
+            # ❌ Unlike
+            movie.liked_by.remove(request.user)
+
+            # ❌ Also remove from watchlist
+            Watchlist.objects.filter(user=request.user, movie=movie).delete()
+        else:
+            # ✅ Like
+            movie.liked_by.add(request.user)
+
+            # ✅ Add to watchlist if not already
+            Watchlist.objects.get_or_create(user=request.user, movie=movie)
+
+        return redirect('get_movie')
+
+    except Movies.DoesNotExist:
+        return HttpResponse("Movie not found", status=404)
+        return HttpResponse("Movie not found", status=404)
+
+@login_required
+def watchlist(request):
+    watchlist_items = Watchlist.objects.filter(user=request.user)
+    return render(request, 'watchlist.html', {'watchlist_items': watchlist_items})
 
 # ModelForm Views
 def add_user(request):

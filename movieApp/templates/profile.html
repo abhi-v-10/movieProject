@@ -7,9 +7,13 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h2 class="text-center mb-4">Welcome, {{ user.username }}</h2>
+        <h2 class="text-center mb-4">Welcome, {{ user.first_name }}</h2>
         
         <form class="mx-auto" style="max-width: 400px;">
+            <div class="mb-3">
+                <label for="emailid" class="form-label">Email ID</label>
+                <input type="text" class="form-control" id="emailid" value="{{ user.email }}" disabled>
+            </div>
             <div class="mb-3">
                 <label for="mobilenumber" class="form-label">Mobile Number</label>
                 <input type="text" class="form-control" id="mobilenumber" value="{{ user.mobilenumber }}" disabled>
@@ -20,6 +24,7 @@
             </div>
             <a href="{% url 'logout_user' %}" class="btn btn-danger">Logout</a>
             <a href="{% url 'home' %}" class="btn btn-primary">Home</a>
+            <a href="{% url 'edit_user' %}" class="btn btn-warning">Edit</a>
         </form>
     </div>
 </body>

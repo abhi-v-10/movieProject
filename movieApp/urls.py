@@ -17,10 +17,14 @@ urlpatterns = [
     path('update_movie/<int:id>', views.update_movie, name="update_movie"),
     path('delete_movie/<int:id>', views.delete_movie, name="delete_movie"),
     path('add_relations/', views.add_relations, name="add_relations"),
+    path('like/<int:movie_id>/', views.like_movie, name='like_movie'),
+    path('watchlist/', views.watchlist, name='watchlist'),
+
     
     path('create_user/', views.create_user, name="create_user"),
     path('login_user/', views.login_user, name="login_user"),
     path('logout_user/', views.logout_user, name='logout_user'),
+    path('edit_user/', views.edit_user, name='edit_user'),
     path('profile/', views.profile, name='profile'),
     path('add_user/', views.add_user, name='add_user'),
 

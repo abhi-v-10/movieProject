@@ -45,7 +45,7 @@
                     <a href="{% url 'create_user' %}" class="btn btn-outline-info">Sign Up</a>
                 </p>
             {% else %}
-                <p class="text-muted mt-3">You are logged in as {{ user.username }}</p>
+                <p class="text-muted mt-3">You are logged in as {{ user.first_name }}</p>
             {% endif %}
         </div>
     </div>
