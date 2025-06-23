@@ -8,6 +8,8 @@ MovieProject is a Django-based web application for managing a collection of movi
 
 - User registration and authentication (custom user model)
 - Add, view, update, and delete movies
+- Pagination for movie listings
+- User specific wishlist
 - User profile page with mobile number and age
 - REST API endpoints for CRUD operations on movies
 - Bootstrap-based responsive UI
@@ -46,10 +48,6 @@ movieProject/
 │   │   ├── user_form.html
 │   │   ├── watchlist.html
 │   │   └── edit_user.html
-│   │   
-│   │      
-│   │   
-│   │ 
 │   ├── tests.py
 │   ├── urls.py
 │   ├── views.py
@@ -148,6 +146,9 @@ All API endpoints use JSON and are implemented in [`movieApp/views.py`](movieApp
 | POST   | `/create_token/`                | Obtain JWT token (SimpleJWT)      |
 | POST   | `/refresh_token/`               | Refresh JWT token (SimpleJWT)     |
 | POST   | `/refresh_custom_token/`        | Custom JWT token refresh          |
+| GET    | `/api_limit_offset/`            | List movies with limit/offset     |
+| GET    | `/api_page_number/`             | List movies with page number      |
+| GET    | `/api_cursor/`                  | List movies with cursor pagination|
 
 ---
 
@@ -198,4 +199,3 @@ This project is for educational and personal use.
 ## 🙏 Acknowledgements
 
 - [Django Documentation](https://docs.djangoproject.com/)
-- [Django REST Framework](https://www.django-rest-framework.org/)
