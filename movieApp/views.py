@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from .models import *
-from .pagination import *
+from .pagination import CustomLimitOffsetPagination, CustomPageNumberPagination, CustomCursorPagination
 from .serializer import *
 from .forms import *
 from rest_framework import status
@@ -53,7 +53,7 @@ def get_movie(request):
         movie = movie.filter(genre__icontains=genre)
     if rel_year:
         movie = movie.filter(rel_year=rel_year)
-    paginator = Paginator(movie, 3)  # Show 3 movies per page
+    paginator = Paginator(movie, 5)  # Show 3 movies per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
