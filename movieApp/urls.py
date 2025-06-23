@@ -19,7 +19,6 @@ urlpatterns = [
     path('add_relations/', views.add_relations, name="add_relations"),
     path('like/<int:movie_id>/', views.like_movie, name='like_movie'),
     path('watchlist/', views.watchlist, name='watchlist'),
-
     
     path('create_user/', views.create_user, name="create_user"),
     path('login_user/', views.login_user, name="login_user"),
@@ -37,6 +36,9 @@ urlpatterns = [
     path("api_view_token/", views.api_view_token, name="api_view_token"),
     path("api_test_token/", views.api_test_token, name="api_test_token"),
     path("api_logout/", views.api_logout, name="api_logout"),
+    path("api_limit_offset/" , views.api_limit_offset, name="api_limit_offset"),
+    path("api_page_number/", views.api_page_number, name="api_page_number"),
+    path("api_cursor/", views.api_cursor, name="api_cursor"),
 
     path("create_token/", TokenObtainPairView.as_view(), name="create_token"),
     path("refresh_token/", TokenRefreshView.as_view(), name="refresh_token"),

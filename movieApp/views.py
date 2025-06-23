@@ -1,20 +1,22 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from rest_framework import status
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model
-from .models import *
-from rest_framework.decorators import api_view
+from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
-from rest_framework.decorators import permission_classes
+from .models import *
+from .pagination import *
+from .serializer import *
+from .forms import *
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from .serializer import *
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
-from .forms import *
+
 
 
 class CustomPairView(TokenObtainPairView):
@@ -51,7 +53,18 @@ def get_movie(request):
         movie = movie.filter(genre__icontains=genre)
     if rel_year:
         movie = movie.filter(rel_year=rel_year)
-    context = {"movie":movie}
+    paginator = Paginator(movie, 3)  # Show 3 movies per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = {
+        "page_obj": page_obj,  # same variable name as movie_list
+        "filters": {
+            "name": name,
+            "language": language,
+            "genre": genre,
+            "rel_year": rel_year
+        }
+    }
     return render(request, 'get_movies.html', context)
 
 @permission_classes([IsAuthenticated])
@@ -208,22 +221,15 @@ def like_movie(request, movie_id):
         movie = Movies.objects.get(id=movie_id)
 
         if request.user in movie.liked_by.all():
-            # ❌ Unlike
             movie.liked_by.remove(request.user)
-
-            # ❌ Also remove from watchlist
             Watchlist.objects.filter(user=request.user, movie=movie).delete()
         else:
-            # ✅ Like
             movie.liked_by.add(request.user)
-
-            # ✅ Add to watchlist if not already
             Watchlist.objects.get_or_create(user=request.user, movie=movie)
 
         return redirect('get_movie')
 
     except Movies.DoesNotExist:
-        return HttpResponse("Movie not found", status=404)
         return HttpResponse("Movie not found", status=404)
 
 @login_required
@@ -241,7 +247,6 @@ def add_user(request):
     else:
         form = UserForm()
     return render(request, 'user_form.html', {'form': form})
-
 
 # API Views
 
@@ -323,3 +328,27 @@ def api_logout(request):
     token = RefreshToken(refresh_token)
     token.blacklist()
     return Response({"message": "Logged out successfully"}, status=205)
+
+@api_view(['GET'])
+def api_limit_offset(request):
+    movie = Movies.objects.all()
+    paginator = CustomLimitOffsetPagination()
+    paginated_movie = paginator.paginate_queryset(movie, request)
+    serializers = MovieSerializer(paginated_movie, many=True)
+    return paginator.get_paginated_response(serializers.data)
+
+@api_view(['GET'])
+def api_page_number(request):
+    movie = Movies.objects.all()
+    paginator = CustomPageNumberPagination()
+    paginated_movie = paginator.paginate_queryset(movie, request)
+    serializers = MovieSerializer(paginated_movie, many=True)
+    return paginator.get_paginated_response(serializers.data)
+
+@api_view(['GET'])
+def api_cursor(request):
+    movie = Movies.objects.all()
+    paginator = CustomCursorPagination()
+    paginated_movie = paginator.paginate_queryset(movie, request)
+    serializers = MovieSerializer(paginated_movie, many=True)
+    return paginator.get_paginated_response(serializers.data)

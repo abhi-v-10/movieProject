@@ -18,6 +18,7 @@
     }
     .table td:last-child a {
       margin: 0 4px;
+      display: inline-block;
     }
     h2 {
       font-weight: 600;
@@ -33,6 +34,30 @@
     td[colspan] {
       text-align: left !important;
     }
+    /* Ensure names stay in a single line */
+    .table td:nth-child(2) {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
+    }
+    /* Align buttons in a single row */
+    .table td:last-child {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+    }
+    /* Adjust column widths */
+    .table th:nth-child(4), /* Release Year */
+    .table th:nth-child(10), /* Budget */
+    .table th:nth-child(11) { /* Collection */
+      max-width: 85px; /* Decreased width */
+    }
+    .table th:nth-child(6), /* Hero */
+    .table th:nth-child(7), /* Heroine */
+    .table th:nth-child(12) { /* Production */
+      max-width: 200px; /* Increased width */
+    }
   </style>
 </head>
 <body>
@@ -42,50 +67,49 @@
       <table class="table table-bordered table-hover table-striped shadow-sm align-middle">
         <thead class="table-dark">
           <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Language</th>
-            <th>Release Year</th>
-            <th>Genre</th>
-            <th>Hero</th>
-            <th>Heroine</th>
-            <th>Rating</th>
-            <th>Runtime</th>
-            <th>Budget (Cr)</th>
-            <th>Collection (Cr)</th>
-            <th>Production</th>
-            <th>Other Languages</th>
-            <th>Action</th>
+            <th scope="col">ID</th>
+            <th scope="col">Name</th>
+            <th scope="col">Language</th>
+            <th scope="col">Release Year</th>
+            <th scope="col">Genre</th>
+            <th scope="col">Hero</th>
+            <th scope="col">Heroine</th>
+            <th scope="col">Rating</th>
+            <th scope="col">Runtime</th>
+            <th scope="col">Budget (Cr)</th>
+            <th scope="col">Collection (Cr)</th>
+            <th scope="col">Production</th>
+            <th scope="col">Other Languages</th>
+            <th scope="col">Action</th>
           </tr>
         </thead>
         <tbody>
-          {% for i in movie %}
+          {% for i in page_obj %}
           <tr>
-            <td>{{ i.id }}</td>
-            <td>{{ i.name }}</td>
-            <td>{{ i.language }}</td>
-            <td>{{ i.rel_year }}</td>
-            <td>{{ i.genre }}</td>
-            <td>{{ i.hero }}</td>
-            <td>{{ i.heroine }}</td>
-            <td>{{ i.imdb_rating }}</td>
-            <td>{{ i.runtime }}</td>
-            <td>{{ i.movie_details.budget }}</td>
-            <td>{{ i.movie_details.collection }}</td>
-            <td>{{ i.production.name }}</td>
-            <td>
+            <td scope="row">{{ i.id }}</td>
+            <td scope="row">{{ i.name }}</td>
+            <td scope="row">{{ i.language }}</td>
+            <td scope="row">{{ i.rel_year }}</td>
+            <td scope="row">{{ i.genre }}</td>
+            <td scope="row">{{ i.hero }}</td>
+            <td scope="row">{{ i.heroine }}</td>
+            <td scope="row">{{ i.imdb_rating }}</td>
+            <td scope="row">{{ i.runtime }}</td>
+            <td scope="row">{{ i.movie_details.budget }}</td>
+            <td scope="row">{{ i.movie_details.collection }}</td>
+            <td scope="row">{{ i.production.name }}</td>
+            <td scope="row">
               {% for lang in i.other_languages.all %}
                 {{ lang.other_language }}{% if not forloop.last %}, {% endif %}
               {% endfor %}
             </td>
-            <td>
+            <td scope="row">
               {% if user in i.liked_by.all %}
-                <a href="{% url 'like_movie' i.id %}" class="btn btn-sm btn-outline-danger mb-1">Unlike</a>
+                <a href="{% url 'like_movie' i.id %}" class="btn btn-sm btn-outline-danger">Unlike</a>
               {% else %}
-                <a href="{% url 'like_movie' i.id %}" class="btn btn-sm btn-outline-success mb-1">Like</a>
+                <a href="{% url 'like_movie' i.id %}" class="btn btn-sm btn-outline-success">Like</a>
               {% endif %}
-  
-              <a href="{% url 'update_movie' i.id %}" class="btn btn-sm btn-primary mb-1">Edit</a>
+              <a href="{% url 'update_movie' i.id %}" class="btn btn-sm btn-primary">Edit</a>
               <a href="{% url 'delete_movie' i.id %}" class="btn btn-sm btn-danger">Delete</a>
             </td>
           </tr>
@@ -94,11 +118,56 @@
       </table>
     </div>
     <div class="d-flex justify-content-between my-3">
-  <a href="{% url 'home' %}" class="btn btn-md btn-success">Home</a>
-  <a href="{% url 'watchlist' %}" class="btn btn-sm btn-primary">Watchlist</a>
-  <a href="{% url 'post_movie' %}" class="btn btn-md btn-warning">Add Movies</a>
-</div>
+      <a href="{% url 'home' %}" class="btn btn-md btn-success">Home</a>
+      <a href="{% url 'watchlist' %}" class="btn btn-sm btn-primary">Watchlist</a>
+      <a href="{% url 'post_movie' %}" class="btn btn-md btn-warning">Add Movies</a>
+    </div>
 
+    <div class="d-flex justify-content-between align-items-center">
+      <span class="text-muted">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      </span>
+
+      <nav>
+        <ul class="pagination mb-0">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page=1">First</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">First</span>
+            </li>
+            <li class="page-item disabled">
+              <span class="page-link">Previous</span>
+            </li>
+          {% endif %}
+
+          <li class="page-item active">
+            <span class="page-link">{{ page_obj.number }}</span>
+          </li>
+
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">Next</span>
+            </li>
+            <li class="page-item disabled">
+              <span class="page-link">Last</span>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
   </div>
 </body>
 </html>
