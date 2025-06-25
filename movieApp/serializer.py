@@ -2,6 +2,7 @@ from rest_framework import serializers
 from movieApp.models import *
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
+import re
 
 # class DetailsSerializer(serializers.ModelSerializer):
 #     class Meta:
@@ -55,35 +56,35 @@ class MovieSerializer(serializers.ModelSerializer):
         model = Movies
         exclude = ['id']
 
-    # def validate_imdb_rating(self, value):
-    #     if value < 0 or value > 10:
-    #         raise serializers.ValidationError("IMDB rating must be between 0 and 10.")
-    #     return value
+    def validate_imdb_rating(self, value):
+        if value < 0 or value > 10:
+            raise serializers.ValidationError("IMDB rating must be between 0 and 10.")
+        return value
 
-    # def validate_runtime(self, value):
-    #     if value <= 0:
-    #         raise serializers.ValidationError("Runtime must be a positive integer.")
-    #     return value
+    def validate_runtime(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Runtime must be a positive integer.")
+        return value
 
-    # def validate(self, data):
-    #     if not data.get('name'):
-    #         raise serializers.ValidationError("Movie name is required.")
-    #     if not data.get('language'):
-    #         raise serializers.ValidationError("Language is required.")
-    #     if not data.get('rel_year'):
-    #         raise serializers.ValidationError("Release year is required.")
-    #     if not data.get('genre'):
-    #         raise serializers.ValidationError("Genre is required.")
-    #     if not data.get('hero'):
-    #         raise serializers.ValidationError("Hero name is required.")
-    #     if not data.get('heroine'):
-    #         raise serializers.ValidationError("Heroine name is required.")
-    #     return data
+    def validate(self, data):
+        if not data.get('name'):
+            raise serializers.ValidationError("Movie name is required.")
+        if not data.get('language'):
+            raise serializers.ValidationError("Language is required.")
+        if not data.get('rel_year'):
+            raise serializers.ValidationError("Release year is required.")
+        if not data.get('genre'):
+            raise serializers.ValidationError("Genre is required.")
+        if not data.get('hero'):
+            raise serializers.ValidationError("Hero name is required.")
+        if not data.get('heroine'):
+            raise serializers.ValidationError("Heroine name is required.")
+        return data
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'mobilenumber', 'age']
+        fields = ['id', 'username', 'mobilenumber', 'email']
     
     def validate_mobilenumber(self, value):
         if not value.isdigit():
@@ -92,10 +93,22 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Mobile number must be between 10 and 15 digits.")
         return value
     
-    def validate_age(self, value):
-        if value < 0:
-            raise serializers.ValidationError("Age cannot be negative.")
-        return value    
+    def validate_email(self, value):
+        # Regex pattern for basic email format
+        email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        
+        if not re.match(email_regex, value):
+            raise serializers.ValidationError("Enter a valid email address.")
+
+        # Check for uniqueness
+        user_qs = User.objects.filter(email__iexact=value)
+        if self.instance:
+            user_qs = user_qs.exclude(pk=self.instance.pk)
+        if user_qs.exists():
+            raise serializers.ValidationError("This email is already registered.")
+        
+        return value
+        
         
 
 class CustomTokenSerializer(TokenObtainPairSerializer):

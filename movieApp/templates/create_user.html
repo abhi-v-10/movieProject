@@ -1,88 +1,166 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Create User</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #f0f2f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .form-card {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 30px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    h2 {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    label {
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .form-control {
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
+
+    .btn-primary {
+      padding: 10px 30px;
+      border-radius: 50px;
+    }
+
+    .btn-primary:hover {
+      background-color: #0b5ed7;
+    }
+
+    .invalid-feedback {
+      font-size: 0.875rem;
+    }
+
+    .alert ul {
+      padding-left: 20px;
+    }
+
+    .social-section {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .social-btn {
+      width: 220px;
+      border-radius: 30px;
+      font-weight: 500;
+    }
+
+    .social-btn i {
+      margin-right: 8px;
+    }
+
+    @media (max-width: 576px) {
+      .social-btn {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="container mt-5">
-    <h1 class="text-center mb-4">Create User</h1>
+  <div class="container py-5">
+    <div class="form-card">
+      <h2 class="text-center mb-4">Create Your Account</h2>
 
-    {% if errors %}
-      <div class="alert alert-danger">
-        <h5 class="alert-heading">Please correct the following errors:</h5>
-        <ul class="mb-0">
-          {% for field, field_errors in errors.items %}
-            <li><strong>{{ field|capfirst }}:</strong> {{ field_errors.0 }}</li>
-          {% endfor %}
-        </ul>
-      </div>
-    {% endif %}
+      {% if errors %}
+        <div class="alert alert-danger">
+          <h5 class="alert-heading">Please fix the following errors:</h5>
+          <ul class="mb-0">
+            {% for field, field_errors in errors.items %}
+              <li><strong>{{ field|capfirst }}:</strong> {{ field_errors.0 }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
 
-    <form action="{% url 'create_user' %}" method="post">
-      {% csrf_token %}
-      <div class="row g-3">
+      <form action="{% url 'create_user' %}" method="post">
+        {% csrf_token %}
+        <div class="row g-4">
 
-        <!-- Username -->
-        <div class="col-md-3">
-          <label for="username" class="form-label">Username</label>
-          <input type="text" class="form-control {% if errors.username %}is-invalid{% endif %}"
-                 id="username" name="username" value="{{ data.username|default:'' }}" placeholder="Enter Username" autocomplete="off">
-          {% if errors.username %}
-            <div class="invalid-feedback d-block">{{ errors.username.0 }}</div>
-          {% endif %}
+          <!-- Username -->
+          <div class="col-md-6">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" id="username" name="username"
+              class="form-control {% if errors.username %}is-invalid{% endif %}"
+              placeholder="Enter Username" value="{{ data.username|default:'' }}" autocomplete="off" />
+            {% if errors.username %}
+              <div class="invalid-feedback d-block">{{ errors.username.0 }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Password -->
+          <div class="col-md-6">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" id="password" name="password"
+              class="form-control {% if errors.password %}is-invalid{% endif %}"
+              placeholder="Enter Password" autocomplete="new-password" />
+            {% if errors.password %}
+              <div class="invalid-feedback d-block">{{ errors.password.0 }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Mobile Number -->
+          <div class="col-md-6">
+            <label for="mobilenumber" class="form-label">Mobile Number</label>
+            <input type="text" id="mobilenumber" name="mobilenumber"
+              class="form-control {% if errors.mobilenumber %}is-invalid{% endif %}"
+              placeholder="Enter Mobile Number" value="{{ data.mobilenumber|default:'' }}" autocomplete="off" />
+            {% if errors.mobilenumber %}
+              <div class="invalid-feedback d-block">{{ errors.mobilenumber.0 }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Email ID -->
+          <div class="col-md-6">
+            <label for="email" class="form-label">Email ID</label>
+            <input type="email" id="email" name="email"
+              class="form-control {% if errors.email %}is-invalid{% endif %}"
+              placeholder="Enter Email" value="{{ data.email|default:'' }}" autocomplete="email" required />
+            {% if errors.email %}
+              <div class="invalid-feedback d-block">{{ errors.email.0 }}</div>
+            {% endif %}
+          </div>
         </div>
 
-        <!-- Password -->
-        <div class="col-md-3">
-          <label for="password" class="form-label">Password</label>
-          <input type="password" class="form-control {% if errors.password %}is-invalid{% endif %}"
-                 id="password" name="password" placeholder="Enter Password" autocomplete="new-password">
-          {% if errors.password %}
-            <div class="invalid-feedback d-block">{{ errors.password.0 }}</div>
-          {% endif %}
+        <!-- Submit Button -->
+        <div class="text-center mt-4">
+          <button type="submit" class="btn btn-primary">Create Account</button>
         </div>
 
-        <!-- Mobile Number -->
-        <div class="col-md-3">
-          <label for="mobilenumber" class="form-label">Mobile Number</label>
-          <input type="text" class="form-control {% if errors.mobilenumber %}is-invalid{% endif %}"
-                 id="mobilenumber" name="mobilenumber" value="{{ data.mobilenumber|default:'' }}" placeholder="Enter Mobile Number" autocomplete="off">
-          {% if errors.mobilenumber %}
-            <div class="invalid-feedback d-block">{{ errors.mobilenumber.0 }}</div>
-          {% endif %}
+        <!-- Social Login -->
+        <div class="social-section mt-4">
+          <a href="{% url 'social:begin' 'github' %}" class="btn btn-dark social-btn">
+            <i class="fab fa-github"></i> Sign in with GitHub
+          </a>
+          <a href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-danger social-btn">
+            <i class="fab fa-google"></i> Sign in with Google
+          </a>
         </div>
-
-        <!-- Age -->
-        <div class="col-md-3">
-          <label for="age" class="form-label">Age</label>
-          <input type="text" class="form-control {% if errors.age %}is-invalid{% endif %}"
-                 id="age" name="age" value="{{ data.age|default:'' }}" placeholder="Enter Age" autocomplete="off">
-          {% if errors.age %}
-            <div class="invalid-feedback d-block">{{ errors.age.0 }}</div>
-          {% endif %}
-        </div>
-        <div class="d-flex justify-content-center">
-            <button type="submit" class="btn btn-success mb-2 px-5">Login</button>
-        </div>
-        <div class="d-flex justify-content-center">
-            <a href="{% url 'social:begin' 'github' %}" class="btn btn-dark mx-2">
-        <i class="fab fa-github"></i>GitHub
-      </a>
-      <a href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-danger mx-2">
-        <i class="fab fa-google"></i> Google
-      </a>
+      </form>
     </div>
-      
-    </form>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-
-</body>

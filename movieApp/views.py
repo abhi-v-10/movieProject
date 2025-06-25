@@ -44,6 +44,7 @@ def get_movie(request):
     language = request.GET.get('language')
     genre = request.GET.get('genre')
     rel_year = request.GET.get('rel_year')
+    production = request.GET.get('production')
     movie = Movies.objects.all()
     if name:
         movie = movie.filter(name__icontains=name)
@@ -53,6 +54,9 @@ def get_movie(request):
         movie = movie.filter(genre__icontains=genre)
     if rel_year:
         movie = movie.filter(rel_year=rel_year)
+    if production:
+        movie = movie.filter(production__icontains=production)
+        
     paginator = Paginator(movie, 5)  # Show 3 movies per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -137,7 +141,6 @@ def create_user(request):
             "password": request.POST.get("password", ""),
             "email": request.POST.get("email", ""),
             "mobilenumber": request.POST.get("mobilenumber", ""),
-            "age": request.POST.get("age", "")
         }
 
         serializer = UserSerializer(data=data)
@@ -185,17 +188,17 @@ def edit_user(request):
 
     if request.method == 'POST':
         mobilenumber = request.POST.get('mobilenumber', '')
-        age = request.POST.get('age', '')
+        display_name = request.POST.get('display_name', '')
 
         user.mobilenumber = mobilenumber
-        user.age = age
+        user.display_name = display_name
         user.save()
 
         return redirect('profile')
 
     return render(request, 'edit_user.html', {
         'mobilenumber': user.mobilenumber or '',
-        'age': user.age or '',
+        'display_name': user.display_name or '',
     })
 
 @permission_classes([IsAuthenticated])

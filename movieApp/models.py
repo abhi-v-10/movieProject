@@ -16,8 +16,11 @@ class OtherLanguages(models.Model):
     other_language = models.CharField(max_length=100)
 
 class User(AbstractUser):
+    display_name = models.CharField(max_length=150, blank=True)
     mobilenumber = models.CharField(null=True, max_length=15)
-    age = models.IntegerField(null=True) 
+    email = models.EmailField(unique=True)
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
 
 class Movies(models.Model):
     name = models.CharField(max_length = 250)

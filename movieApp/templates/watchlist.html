@@ -7,42 +7,61 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
-      background-color: #f8f9fa;
-      padding: 2rem;
+      background-color: #f2f4f8;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
+
+    .watchlist-container {
+      max-width: 1000px;
+      margin: 60px auto;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 2rem 2.5rem;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    }
+
     h2 {
+      font-weight: 600;
+      color: #1f2d3d;
       text-align: center;
       margin-bottom: 30px;
-      font-weight: 600;
-      color: #343a40;
     }
-    .table thead th {
+
+    .table th, .table td {
       vertical-align: middle;
       text-align: center;
     }
-    .table td {
-      text-align: center;
-      vertical-align: middle;
+
+    .badge-status {
+      font-size: 0.95rem;
+      padding: 6px 12px;
+      border-radius: 50px;
     }
-    .watchlist-container {
-      background: white;
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    .btn-back {
+      border-radius: 50px;
+      padding: 10px 25px;
     }
+
+    .no-data {
+      color: #6c757d;
+      font-style: italic;
+    }
+
   </style>
 </head>
 <body>
   <div class="container watchlist-container">
-    <h2>Your Watchlist</h2>
+    <h2>🎬 Your Watchlist</h2>
+
     <div class="table-responsive">
-      <table class="table table-bordered table-hover table-striped align-middle">
+      <table class="table table-bordered table-hover table-striped align-middle shadow-sm">
         <thead class="table-dark">
           <tr>
             <th>Name</th>
             <th>Language</th>
             <th>Release Year</th>
-            <th>Liked?</th>
+            <th>Liked</th>
           </tr>
         </thead>
         <tbody>
@@ -53,23 +72,26 @@
             <td>{{ item.movie.rel_year }}</td>
             <td>
               {% if user in item.movie.liked_by.all %}
-                <span class="text-success fw-bold">✅</span>
+                <span class="badge bg-success badge-status">Liked ✅</span>
               {% else %}
-                <span class="text-danger fw-bold">❌</span>
+                <span class="badge bg-danger badge-status">Not Liked ❌</span>
               {% endif %}
             </td>
           </tr>
           {% empty %}
           <tr>
-            <td colspan="4" class="text-center text-muted">No movies in your watchlist yet.</td>
+            <td colspan="4" class="text-center no-data">No movies in your watchlist yet.</td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
-    <div class="text-end mt-3">
-      <a href="{% url 'get_movie' %}" class="btn btn-primary">Back to Movie List</a>
+
+    <div class="text-end mt-4">
+      <a href="{% url 'get_movie' %}" class="btn btn-primary btn-back">← Back to Movies</a>
     </div>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
