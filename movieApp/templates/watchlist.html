@@ -2,93 +2,209 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Your Watchlist</title>
+  <title>Your Watchlist | MovieDB</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
   <style>
     body {
-      background-color: #f2f4f8;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('https://preview.redd.it/how-can-someone-make-this-background-with-html-and-css-i-v0-zjgs096khv591.jpg?width=640&crop=smart&auto=webp&s=68db8dc7dabf2d4467bbae5d5c62992075b6cd80') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+
+    .overlay {
+      background: rgba(0, 0, 0, 0.85);
+      min-height: 100vh;
+      padding-top: 80px;
+      padding-bottom: 40px;
+    }
+
+    .navbar {
+      background: rgba(0, 0, 0, 0.9);
+      box-shadow: 0 2px 8px rgba(255, 0, 0, 0.2);
+    }
+
+    .navbar-brand {
+      font-weight: bold;
+      font-size: 1.5rem;
+      color: #ff0000 !important;
+    }
+
+    .nav-link {
+      color: #fff !important;
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      border: 1px solid red;
+      background-color: rgba(255, 0, 0, 0.1);
+    }
+
+    .nav-center {
+      flex: 1;
+      justify-content: center;
+      gap: 1rem;
     }
 
     .watchlist-container {
-      max-width: 1000px;
-      margin: 60px auto;
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.05);
       border-radius: 16px;
-      padding: 2rem 2.5rem;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+      padding: 25px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 12px 30px rgba(255, 0, 0, 0.15);
     }
 
-    h2 {
-      font-weight: 600;
-      color: #1f2d3d;
-      text-align: center;
-      margin-bottom: 30px;
+    .watchlist-header {
+      background: linear-gradient(135deg, #ff416c, #ff4b2b);
+      border-radius: 12px;
+      padding: 20px 30px;
+      margin-bottom: 20px;
+      color: white;
     }
 
-    .table th, .table td {
+    .watchlist-table th,
+    .watchlist-table td {
       vertical-align: middle;
       text-align: center;
+      white-space: nowrap;
+      padding: 16px 10px;
+      background-color: rgba(255, 255, 255, 0.05);
+      color: #f1f1f1;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .watchlist-table th {
+      background-color: rgba(0, 0, 0, 0.6);
+      color: #ffd700;
     }
 
     .badge-status {
-      font-size: 0.95rem;
-      padding: 6px 12px;
-      border-radius: 50px;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 30px;
     }
 
-    .btn-back {
-      border-radius: 50px;
-      padding: 10px 25px;
+    .footer-controls {
+      margin-top: auto;
+      padding-top: 20px;
+      text-align: right;
+      color: #ccc;
+    }
+
+    .btn-warning {
+      border-radius: 30px;
+      font-weight: 600;
     }
 
     .no-data {
-      color: #6c757d;
       font-style: italic;
+      color: #bbb;
     }
 
+    @media (max-width: 768px) {
+      .watchlist-table th, .watchlist-table td {
+        font-size: 0.85rem;
+        padding: 10px 6px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="container watchlist-container">
-    <h2>🎬 Your Watchlist</h2>
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand" href="{% url 'home' %}">MovieDB</a>
+      <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-    <div class="table-responsive">
-      <table class="table table-bordered table-hover table-striped align-middle shadow-sm">
-        <thead class="table-dark">
-          <tr>
-            <th>Name</th>
-            <th>Language</th>
-            <th>Release Year</th>
-            <th>Liked</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for item in watchlist_items %}
-          <tr>
-            <td>{{ item.movie.name }}</td>
-            <td>{{ item.movie.language }}</td>
-            <td>{{ item.movie.rel_year }}</td>
-            <td>
-              {% if user in item.movie.liked_by.all %}
-                <span class="badge bg-success badge-status">Liked ✅</span>
-              {% else %}
-                <span class="badge bg-danger badge-status">Not Liked ❌</span>
-              {% endif %}
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="4" class="text-center no-data">No movies in your watchlist yet.</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      <div class="collapse navbar-collapse nav-center d-flex" id="mainNavbar">
+        <ul class="navbar-nav d-flex flex-row gap-3">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'post_movie' %}">Add Movie</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'add_relations' %}">Relations</a>
+          </li>
+        </ul>
+        <ul class="navbar-nav ms-auto gap-3">
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'profile' %}">Profile</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'logout_user' %}">Logout</a>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login_user' %}">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'create_user' %}">Sign Up</a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
     </div>
+  </nav>
 
-    <div class="text-end mt-4">
-      <a href="{% url 'get_movie' %}" class="btn btn-primary btn-back">← Back to Movies</a>
+  <div class="overlay">
+    <div class="container watchlist-container">
+      <div class="watchlist-header d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+          <h2><i class="bi bi-star-fill me-2"></i>Your Watchlist</h2>
+          <p class="opacity-75 mb-0">Movies you saved to watch later</p>
+        </div>
+        <div>
+          <a href="{% url 'get_movie' %}" class="btn btn-warning btn-sm text-dark fw-semibold mt-2 mt-md-0">
+            <i class="bi bi-arrow-left-circle"></i> Back to Movies
+          </a>
+        </div>
+      </div>
+
+      <div class="table-responsive flex-grow-1">
+        <table class="table table-hover watchlist-table table-bordered mb-0">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Language</th>
+              <th>Release Year</th>
+              <th>Status</th>
+              <th>Added</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in watchlist_items %}
+            <tr>
+              <td>{{ item.movie.name }}</td>
+              <td>{{ item.movie.language }}</td>
+              <td>{{ item.movie.rel_year }}</td>
+              <td>
+                {% if user in item.movie.liked_by.all %}
+                  <span class="badge bg-success badge-status">Liked ✅</span>
+                {% else %}
+                  <span class="badge bg-danger badge-status">Not Liked ❌</span>
+                {% endif %}
+              </td>
+              <td>{{ item.time_added }} ago</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center no-data">No movies in your watchlist yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="footer-controls">
+        <span class="text-muted small">Total: {{ watchlist_items|length }} movie{{ watchlist_items|length|pluralize }}</span>
+      </div>
     </div>
   </div>
 

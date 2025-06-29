@@ -57,11 +57,11 @@ def get_movie(request):
     if production:
         movie = movie.filter(production__icontains=production)
         
-    paginator = Paginator(movie, 5)  # Show 3 movies per page
+    paginator = Paginator(movie, 5)  
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
-        "page_obj": page_obj,  # same variable name as movie_list
+        "page_obj": page_obj,
         "filters": {
             "name": name,
             "language": language,

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils.timesince import timesince
 
 # One-to-One relationship with MovieDetails
 class MovieDetails(models.Model):
@@ -36,6 +37,12 @@ class Movies(models.Model):
     other_languages = models.ManyToManyField(OtherLanguages, blank=True)
     liked_by = models.ManyToManyField(User, related_name="liked_movies", blank=True)
 
+    @property
+    def runtime_hm(self):
+        hours = self.runtime // 60
+        minutes = self.runtime % 60
+        return f"{hours}h {minutes}m"
+
 class Watchlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="watchlist")
     movie = models.ForeignKey(Movies, on_delete=models.CASCADE)
@@ -43,6 +50,9 @@ class Watchlist(models.Model):
 
     class Meta:
         unique_together = ['user', 'movie']
+    @property
+    def time_added(self):
+        return timesince(self.added_at)
     
 
     
