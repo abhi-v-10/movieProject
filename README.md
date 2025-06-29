@@ -12,7 +12,7 @@ MovieProject is a Django-based web application for managing a collection of movi
 - User specific wishlist
 - User profile page with mobile number and age
 - REST API endpoints for CRUD operations on movies
-- Bootstrap-based responsive UI
+- Bootstrap-based, Netflix-inspired responsive UI
 - Admin interface for managing users and movies
 - Demonstrates Django model relationships: One-to-One, One-to-Many, Many-to-Many
 
