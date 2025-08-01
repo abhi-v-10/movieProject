@@ -19,9 +19,10 @@ class OtherLanguages(models.Model):
 class User(AbstractUser):
     display_name = models.CharField(max_length=150, blank=True)
     mobilenumber = models.CharField(null=True, max_length=15)
-    email = models.EmailField(unique=True)
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    email = models.EmailField(unique=True, blank=True, null=True)
+    is_premium = models.BooleanField(default=False)
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email']
 
 class Movies(models.Model):
     name = models.CharField(max_length = 250)
@@ -36,6 +37,7 @@ class Movies(models.Model):
     production = models.ForeignKey(Production, null=True, on_delete=models.CASCADE)
     other_languages = models.ManyToManyField(OtherLanguages, blank=True)
     liked_by = models.ManyToManyField(User, related_name="liked_movies", blank=True)
+    is_premium = models.BooleanField(default=False)
 
     @property
     def runtime_hm(self):

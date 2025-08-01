@@ -126,26 +126,26 @@
       <div class="collapse navbar-collapse nav-center d-flex" id="mainNavbar">
         <ul class="navbar-nav d-flex flex-row gap-3">
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'post_movie' %}">Add Movie</a>
+            <a class="nav-link px-3" href="{% url 'post_movie' %}">Add Movie</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'add_relations' %}">Relations</a>
+            <a class="nav-link px-3" href="{% url 'add_relations' %}">Relations</a>
           </li>
         </ul>
         <ul class="navbar-nav ms-auto gap-3">
           {% if user.is_authenticated %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'profile' %}">Profile</a>
+            <a class="nav-link px-3" href="{% url 'profile' %}">Profile</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'logout_user' %}">Logout</a>
+            <a class="nav-link px-3" href="{% url 'logout_user' %}">Logout</a>
           </li>
           {% else %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'login_user' %}">Login</a>
+            <a class="nav-link px-3" href="{% url 'login_user' %}">Login</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'create_user' %}">Sign Up</a>
+            <a class="nav-link px-3" href="{% url 'create_user' %}">Sign Up</a>
           </li>
           {% endif %}
         </ul>

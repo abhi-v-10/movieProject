@@ -194,6 +194,18 @@
             </select>
           </div>
 
+          <div class="row g-3 mt-3">
+            <div class="col-md-6">
+              <div class="form-check form-switch d-flex align-items-center gap-3">
+                <input class="form-check-input" type="checkbox" id="isPremium" name="premium" {% if movie.is_premium %}checked{% endif %}>
+
+                <label class="form-label mb-0 text-white fw-semibold" for="isPremium">Mark this movie as Premium</label>
+              </div>
+            </div>
+          </div>
+          
+          
+          
           <div class="text-center mt-4">
             <button type="submit" class="btn btn-primary">Update Movie</button>
           </div>

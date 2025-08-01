@@ -8,6 +8,7 @@ from .models import *
 from .pagination import CustomLimitOffsetPagination, CustomPageNumberPagination, CustomCursorPagination
 from .serializer import *
 from .forms import *
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -16,6 +17,11 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
+from openai import OpenAI
+from django.conf import settings
+import google.generativeai as genai
+import stripe
+from decouple import config
 
 
 
@@ -26,6 +32,75 @@ class CustomPairView(TokenObtainPairView):
 def home(request):
     return render(request, 'home.html')
 
+stripe.api_key = config("STRIPE_SECRET_KEY")
+
+def payment_checkout(request):
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=[{
+            'price_data': {
+                'currency': 'inr',
+                'unit_amount': 5000,  # ₹199 in paise
+                'product_data': {
+                    'name': 'Premium Membership',
+                },
+            },
+            'quantity': 1,
+        }],
+        mode='payment',
+        success_url = request.build_absolute_uri('/payment_success/'),
+        cancel_url = request.build_absolute_uri('/payment_failed/'),
+    )
+
+    return redirect(session.url)
+
+def payment_success(request):
+    user = request.user
+    user.is_premium = True
+    user.save()
+    return render(request, 'payment_success.html')
+
+def payment_failed(request):
+    user = request.user
+    user.is_premium = False
+    user.save()
+    return render(request, 'payment_failed.html')
+
+@login_required
+def premium_movies(request):
+    if not request.user.is_premium:
+        return render(request, 'premium.html')
+    movies = Movies.objects.filter(is_premium=True)
+    return render(request, 'premium_movies.html', {'movies':movies})
+
+
+genai.configure(api_key=config("GEMINI_API_KEY"))
+@csrf_exempt
+def gemini_ai(request):
+    if not request.user.is_premium:
+        return render(request, 'premium.html')
+
+    # Clear chat when GET (i.e., when revisiting page fresh)
+    if request.method == "GET":
+        request.session["chat_history"] = []
+
+    chat_history = request.session.get("chat_history", [])
+
+    if request.method == "POST":
+        question = request.POST.get("question")
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        prompt = f"Answer the following movie-related question:\n\n{question}"
+
+        try:
+            response = model.generate_content(prompt)
+            answer = response.text
+        except Exception as e:
+            answer = f"Error: {str(e)}"
+
+        chat_history.append({"question": question, "answer": answer})
+        request.session["chat_history"] = chat_history
+
+    return render(request, "chat.html", {"chat_history": chat_history})
 # @permission_classes([IsAuthenticated])
 @login_required
 def post_movie(request):
@@ -45,7 +120,7 @@ def get_movie(request):
     genre = request.GET.get('genre')
     rel_year = request.GET.get('rel_year')
     production = request.GET.get('production')
-    movie = Movies.objects.all()
+    movie = Movies.objects.filter(is_premium=False)
     if name:
         movie = movie.filter(name__icontains=name)
     if language:
@@ -93,9 +168,9 @@ def update_movie(request, id):
                 "runtime": request.POST.get("runtime"),
                 "movie_details": request.POST.get("movie_details"),
                 "production": request.POST.get("production"),
-                "other_languages": request.POST.getlist("other_languages")
+                "other_languages": request.POST.getlist("other_languages"),
             }
-
+            data["is_premium"] = request.POST.get("premium") == "on"
             serializer = MovieSerializer(instance=movie, data=data)
 
             if serializer.is_valid():

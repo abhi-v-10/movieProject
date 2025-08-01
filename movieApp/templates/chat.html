@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🎬 MovieBot – Ask About Any Movie!</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-image: url('https://preview.redd.it/how-can-someone-make-this-background-with-html-and-css-i-v0-zjgs096khv591.jpg?width=640&crop=smart&auto=webp&s=68db8dc7dabf2d4467bbae5d5c62992075b6cd80');
+      background-size: cover;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+
+    .overlay {
+      background-color: rgba(0, 0, 0, 0.85);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .navbar {
+      background: rgba(0, 0, 0, 0.9);
+      box-shadow: 0 2px 8px rgba(255, 0, 0, 0.2);
+    }
+
+    .navbar-brand {
+      font-weight: bold;
+      font-size: 1.5rem;
+      color: #ff0000 !important;
+    }
+
+    .nav-link {
+      color: #fff !important;
+      position: relative;
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      border: 1px solid red;
+      background-color: rgba(255, 0, 0, 0.1);
+    }
+
+    .chat-container {
+      flex-grow: 1;
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 80px 30px 90px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #fff;
+      text-shadow: 2px 2px 4px #000;
+    }
+
+    .chat-thread {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding-right: 10px;
+      padding-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 200px); /* Adjust for navbar + input form */
+    }
+
+    .chat-bubble {
+      max-width: 75%;
+      padding: 10px 15px;
+      border-radius: 18px;
+      margin: 4px 0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .user-message {
+      background-color: #e50914cc;
+      color: white;
+      align-self: flex-end;
+      text-align: right;
+    }
+
+    .bot-message {
+      background-color: #333333dd;
+      color: white;
+      align-self: flex-start;
+      text-align: left;
+    }
+
+    .chat-form {
+      position: fixed;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 30px;
+      z-index: 100;
+    }
+
+    .chat-form .input-group {
+      width: 100%;
+    }
+
+    .input-group .form-control {
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .btn-ask {
+      background-color: #e50914;
+      color: #fff;
+      border: none;
+      border-radius: 30px;
+      padding: 10px 25px;
+      font-weight: bold;
+    }
+
+    .btn-ask:hover {
+      background-color: #b00610;
+    }
+
+    .chat-thread::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .chat-thread::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+      <div class="container-fluid px-4">
+        <a class="navbar-brand" href="{% url 'home' %}">MovieDB</a>
+        <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="mainNavbar">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link px-3" href="{% url 'get_movie' %}">View Movies</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Chat Section -->
+    <div class="chat-container">
+      <div class="title">🎬 MovieBot – Ask About Any Movie!</div>
+
+      <div class="chat-thread" id="chat-thread">
+        {% for entry in chat_history %}
+          <div class="chat-bubble user-message">{{ entry.question }}</div>
+          <div class="chat-bubble bot-message">{{ entry.answer }}</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Chat Input -->
+    <form method="POST" class="chat-form">
+      {% csrf_token %}
+      <div class="input-group">
+        <input type="text" name="question" class="form-control" placeholder="Ask me anything about movies..." required>
+        <button class="btn btn-ask" type="submit">Ask</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    function scrollToBottom() {
+      const chatThread = document.getElementById("chat-thread");
+      chatThread.scrollTop = chatThread.scrollHeight;
+    }
+
+    // Scroll after DOM is loaded
+    window.onload = scrollToBottom;
+  </script>
+</body>
+</html>

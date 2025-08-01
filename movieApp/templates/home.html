@@ -136,17 +136,17 @@
         <ul class="navbar-nav mb-2 mb-lg-0">
           {% if user.is_authenticated %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'profile' %}">Profile</a>
+            <a class="nav-link px-3" href="{% url 'profile' %}">Profile</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'logout_user' %}">Logout</a>
+            <a class="nav-link px-3" href="{% url 'logout_user' %}">Logout</a>
           </li>
           {% else %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'login_user' %}">Login</a>
+            <a class="nav-link px-3" href="{% url 'login_user' %}">Login</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'create_user' %}">Sign Up</a>
+            <a class="nav-link px-3" href="{% url 'create_user' %}">Sign Up</a>
           </li>
           {% endif %}
         </ul>
@@ -164,6 +164,8 @@
       <a href="{% url 'post_movie' %}" class="btn btn-cta btn-outline-light">➕ Add Movie</a>
       <a href="{% url 'add_relations' %}" class="btn btn-cta btn-outline-light">🔗 Add Relations</a>
     </div>
+    <div class="d-flex flex-wrap justify-content-center">
+      <a href="{% url 'gemini_ai' %}" class="btn btn-cta btn-outline-light">🤖 Chat with AI</a>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>

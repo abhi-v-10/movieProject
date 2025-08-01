@@ -11,7 +11,12 @@ from rest_framework_simplejwt.views import (
 urlpatterns = [
     
     path('', views.home, name="home"),
-    
+    path('gemini_ai/', views.gemini_ai, name="gemini_ai"),
+    path('premium_movies/', views.premium_movies, name="premium_movies"),
+    path('payment_checkout/', views.payment_checkout, name="payment_checkout"),
+    path('payment_success/', views.payment_success, name="payment_success"),
+    path('payment_failed/', views.payment_failed, name="payment_failed"),
+
     path('post_movie/', views.post_movie, name="post_movie"),
     path('get_movie/', views.get_movie, name="get_movie"),
     path('update_movie/<int:id>', views.update_movie, name="update_movie"),
