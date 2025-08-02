@@ -10,6 +10,7 @@ from .serializer import *
 from .forms import *
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
+from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -17,10 +18,11 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
-from openai import OpenAI
-from django.conf import settings
+from django.core.files.storage import default_storage
+from PIL import Image
 import google.generativeai as genai
 import stripe
+import os
 from decouple import config
 
 
@@ -80,27 +82,43 @@ def gemini_ai(request):
     if not request.user.is_premium:
         return render(request, 'premium.html')
 
-    # Clear chat when GET (i.e., when revisiting page fresh)
     if request.method == "GET":
         request.session["chat_history"] = []
 
     chat_history = request.session.get("chat_history", [])
 
     if request.method == "POST":
-        question = request.POST.get("question")
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        prompt = f"Answer the following movie-related question:\n\n{question}"
+        question = request.POST.get("question", "")
+        image_file = request.FILES.get("image")
 
         try:
-            response = model.generate_content(prompt)
+            if image_file:
+                # Save temporarily
+                temp_path = default_storage.save(f"temp/{image_file.name}", image_file)
+                full_path = default_storage.path(temp_path)
+
+                # Open image with PIL, make a copy, then close it
+                with Image.open(full_path) as img:
+                    image_copy = img.copy()  # Copy the image so we can safely delete the file later
+
+                model = genai.GenerativeModel("gemini-2.5-pro")
+                response = model.generate_content([question or "Describe this image", image_copy])
+
+                # Now safe to delete the temp file
+                os.remove(full_path)
+            else:
+                model = genai.GenerativeModel("models/gemini-2.5-flash-lite")
+                response = model.generate_content(f"Answer the following movie-related question briefly:\n\n{question}")
+
             answer = response.text
         except Exception as e:
             answer = f"Error: {str(e)}"
 
-        chat_history.append({"question": question, "answer": answer})
+        chat_history.append({"question": question or "[Image Uploaded]", "answer": answer})
         request.session["chat_history"] = chat_history
 
     return render(request, "chat.html", {"chat_history": chat_history})
+
 # @permission_classes([IsAuthenticated])
 @login_required
 def post_movie(request):
