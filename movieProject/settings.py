@@ -16,7 +16,7 @@ from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-env_path = BASE_DIR / ".env"
+env_path = os.path.join(BASE_DIR, '.env')
 config = Config(repository=RepositoryEnv(env_path))
 
 # Quick-start development settings - unsuitable for production
@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-gz085m19@fm%55mi+8g=_@i5o&!@37=^al2vo61fpmfsuq07rj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['abhishyanth.pythonanywhere.com']
 
 
 # Application definition
@@ -88,8 +88,6 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config("GOOGLE_OAUTH_CLIENT_SECRET")
 SOCIAL_AUTH_GITHUB_KEY = config("GITHUB_CLIENT_ID")
 SOCIAL_AUTH_GITHUB_SECRET = config("GITHUB_CLIENT_SECRET")
 
-
-
 LOGIN_URL = '/login_user/'
 LOGIN_REDIRECT_URL = '/profile/'
 LOGOUT_REDIRECT_URL = '/login_user/'
@@ -127,6 +125,14 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'moviedb.django@gmail.com'
+EMAIL_HOST_PASSWORD = 'cctsyulilpvmtleb'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -144,6 +150,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

@@ -9,13 +9,14 @@ from rest_framework_simplejwt.views import (
 
 
 urlpatterns = [
-    
+
     path('', views.home, name="home"),
     path('gemini_ai/', views.gemini_ai, name="gemini_ai"),
     path('premium_movies/', views.premium_movies, name="premium_movies"),
     path('payment_checkout/', views.payment_checkout, name="payment_checkout"),
     path('payment_success/', views.payment_success, name="payment_success"),
     path('payment_failed/', views.payment_failed, name="payment_failed"),
+    path('stripe/webhook/', views.stripe_webhook, name='stripe_webhook'),
 
     path('post_movie/', views.post_movie, name="post_movie"),
     path('get_movie/', views.get_movie, name="get_movie"),
@@ -24,7 +25,7 @@ urlpatterns = [
     path('add_relations/', views.add_relations, name="add_relations"),
     path('like/<int:movie_id>/', views.like_movie, name='like_movie'),
     path('watchlist/', views.watchlist, name='watchlist'),
-    
+
     path('create_user/', views.create_user, name="create_user"),
     path('login_user/', views.login_user, name="login_user"),
     path('logout_user/', views.logout_user, name='logout_user'),

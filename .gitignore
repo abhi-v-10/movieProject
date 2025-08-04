@@ -4,5 +4,11 @@ __pycache__/
 db.sqlite3
 env/
 media/
+*.log
+.env/
+venv/
+staticfiles/
+media/
+temp/
 .env
 

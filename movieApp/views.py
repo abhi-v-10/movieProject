@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.core.paginator import Paginator
+from django.core.mail import send_mail
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from .models import *
 from .pagination import CustomLimitOffsetPagination, CustomPageNumberPagination, CustomCursorPagination
@@ -34,8 +36,16 @@ class CustomPairView(TokenObtainPairView):
 def home(request):
     return render(request, 'home.html')
 
-stripe.api_key = config("STRIPE_SECRET_KEY")
+def premium_required(view_func):
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('login')
+        if not request.user.is_premium:
+            return render(request, 'premium.html')
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
+stripe.api_key = config("STRIPE_SECRET_KEY")
 def payment_checkout(request):
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
@@ -50,38 +60,68 @@ def payment_checkout(request):
             'quantity': 1,
         }],
         mode='payment',
+        metadata={
+            "user_id" : request.user.id,
+            },
         success_url = request.build_absolute_uri('/payment_success/'),
         cancel_url = request.build_absolute_uri('/payment_failed/'),
     )
 
     return redirect(session.url)
 
+@csrf_exempt
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
+    webhook_secret = config('STRIPE_WEBHOOK_SECRET')  # set this
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, webhook_secret
+        )
+    except stripe.error.SignatureVerificationError as e:
+        return render(request, "404.html", status=400)
+    except ValueError as e:
+        return render(request, "404.html", status=400)
+
+    # ✅ Handle successful payment
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        user_id = session['metadata']['user_id']
+
+        User = get_user_model()
+        try:
+            user = User.objects.get(id=user_id)
+            user.is_premium = True  # Assuming you have this field
+            user.save()
+            send_mail(
+                subject="🥳 Thank You for Becoming Premium!",
+                message=f"Hi {user.username},\n\nThanks for subscribing to premium! Enjoy exclusive movies and features.",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+        except User.DoesNotExist:
+            return render(request, "404.html", status=404)
+
+    return HttpResponse(status=200)
+
 def payment_success(request):
-    user = request.user
-    user.is_premium = True
-    user.save()
     return render(request, 'payment_success.html')
 
 def payment_failed(request):
-    user = request.user
-    user.is_premium = False
-    user.save()
     return render(request, 'payment_failed.html')
 
 @login_required
+@premium_required
 def premium_movies(request):
-    if not request.user.is_premium:
-        return render(request, 'premium.html')
     movies = Movies.objects.filter(is_premium=True)
     return render(request, 'premium_movies.html', {'movies':movies})
 
-
 genai.configure(api_key=config("GEMINI_API_KEY"))
 @csrf_exempt
+@premium_required
 def gemini_ai(request):
-    if not request.user.is_premium:
-        return render(request, 'premium.html')
-
     if request.method == "GET":
         request.session["chat_history"] = []
 
@@ -149,8 +189,8 @@ def get_movie(request):
         movie = movie.filter(rel_year=rel_year)
     if production:
         movie = movie.filter(production__icontains=production)
-        
-    paginator = Paginator(movie, 5)  
+
+    paginator = Paginator(movie, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -166,7 +206,7 @@ def get_movie(request):
 
 @permission_classes([IsAuthenticated])
 def update_movie(request, id):
-    
+
     try:
         details = MovieDetails.objects.all()
         production = Production.objects.all()
@@ -225,7 +265,7 @@ def delete_movie(request, id):
     except Movies.DoesNotExist:
         return HttpResponse("Movie not found", status=404)
 
-# User Authentication Views 
+# User Authentication Views
 
 def create_user(request):
     if request.method == "POST":
@@ -250,7 +290,7 @@ def create_user(request):
     return render(request, "create_user.html", {
         "data": {}
     })
-        
+
 
 def login_user(request):
     if request.method == "POST":
@@ -368,7 +408,7 @@ def api_update_movie(request, id):
         movie = Movies.objects.get(id=id)
     except Movies.DoesNotExist:
         return Response({"message": "Movie not found"}, status=404)
-    
+
     serializer = MovieSerializer(movie, data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -395,10 +435,10 @@ def api_create_user(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def api_register(request):    
-    serializer = UserSerializer(data=request.data)    
-    serializer.is_valid(raise_exception=True)    
-    serializer.save()    
+def api_register(request):
+    serializer = UserSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 @api_view(['POST'])

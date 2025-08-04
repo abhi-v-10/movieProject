@@ -84,19 +84,31 @@ class MovieSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'mobilenumber', 'email']
-    
+        fields = ['id', 'username', 'password', 'mobilenumber', 'email']
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        user = User(**validated_data)
+        if password:
+            user.set_password(password)  # Hashes the password
+        user.save()
+        return user
+
+
     def validate_mobilenumber(self, value):
         if not value.isdigit():
             raise serializers.ValidationError("Mobile number must contain only digits.")
         if len(value) < 10 or len(value) > 15:
             raise serializers.ValidationError("Mobile number must be between 10 and 15 digits.")
         return value
-    
+
     def validate_email(self, value):
         # Regex pattern for basic email format
         email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        
+
         if not re.match(email_regex, value):
             raise serializers.ValidationError("Enter a valid email address.")
 
@@ -106,10 +118,11 @@ class UserSerializer(serializers.ModelSerializer):
             user_qs = user_qs.exclude(pk=self.instance.pk)
         if user_qs.exists():
             raise serializers.ValidationError("This email is already registered.")
-        
+
+
         return value
-        
-        
+
+
 
 class CustomTokenSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -119,5 +132,5 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
         token['password'] = user.password
         token['age'] = user.age
         return token
-    
+
 
