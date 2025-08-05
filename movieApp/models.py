@@ -38,6 +38,7 @@ class Movies(models.Model):
     other_languages = models.ManyToManyField(OtherLanguages, blank=True)
     liked_by = models.ManyToManyField(User, related_name="liked_movies", blank=True)
     is_premium = models.BooleanField(default=False)
+    created_by = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
 
     @property
     def runtime_hm(self):

@@ -80,9 +80,9 @@ def stripe_webhook(request):
             payload, sig_header, webhook_secret
         )
     except stripe.error.SignatureVerificationError as e:
-        return render(request, "404.html", status=400)
+        return render(request, "errors/404.html", status=400)
     except ValueError as e:
-        return render(request, "404.html", status=400)
+        return render(request, "errors/404.html", status=400)
 
     # ✅ Handle successful payment
     if event['type'] == 'checkout.session.completed':
@@ -102,7 +102,7 @@ def stripe_webhook(request):
                 fail_silently=False,
             )
         except User.DoesNotExist:
-            return render(request, "404.html", status=404)
+            return render(request, "errors/404.html", status=404)
 
     return HttpResponse(status=200)
 
@@ -159,12 +159,15 @@ def gemini_ai(request):
 
     return render(request, "chat.html", {"chat_history": chat_history})
 
-# @permission_classes([IsAuthenticated])
+
 @login_required
 def post_movie(request):
     if request.method == "POST":
         serializer = MovieSerializer(data=request.POST)
         if serializer.is_valid():
+            movie = serializer.save(commit=False)
+            movie.created_by = request.user
+            movie.save()
             serializer.save()
             return redirect('add_relations')
         else:
@@ -204,7 +207,7 @@ def get_movie(request):
     }
     return render(request, 'get_movies.html', context)
 
-@permission_classes([IsAuthenticated])
+@login_required
 def update_movie(request, id):
 
     try:
@@ -212,6 +215,9 @@ def update_movie(request, id):
         production = Production.objects.all()
         other_languages = OtherLanguages.objects.all()
         movie = Movies.objects.get(id=id)
+        if movie.created_by != request.user:
+            messages.error(request, "You are not allowed to update this movie.")
+            return redirect('get_movie')
         errors = {}
 
         if request.method == "POST":
@@ -253,17 +259,20 @@ def update_movie(request, id):
             })
 
     except Movies.DoesNotExist:
-        return HttpResponse("Movie not found", status=404)
+        return render(request, 'errors/404.html', status=404)
 
 
-@permission_classes([IsAuthenticated])
+@login_required
 def delete_movie(request, id):
     try:
         movie = Movies.objects.get(id=id)
+        if movie.created_by != request.user:
+            messages.error(request, "You are not allowed to delete this movie.")
+            return redirect('get_movie')
         movie.delete()
         return redirect('get_movie')
     except Movies.DoesNotExist:
-        return HttpResponse("Movie not found", status=404)
+        return render(request, 'errors/404.html', status=404)
 
 # User Authentication Views
 
@@ -301,21 +310,21 @@ def login_user(request):
             login(request, user)
             return redirect('profile')
         else:
-            return HttpResponse("Invalid credentials", status=401)
+            return render(request, 'errors/401.html', status=401)
     return render(request, 'login_user.html')
 
 
 
-@permission_classes([IsAuthenticated])
+@login_required
 def logout_user(request):
     logout(request)
     return redirect('login_user')
 
-@permission_classes([IsAuthenticated])
+@login_required
 def profile(request):
     return render(request, 'profile.html', {'user': request.user})
 
-@permission_classes([IsAuthenticated])
+@login_required
 def edit_user(request):
     user = request.user
 
@@ -334,7 +343,7 @@ def edit_user(request):
         'display_name': user.display_name or '',
     })
 
-@permission_classes([IsAuthenticated])
+@login_required
 def add_relations(request):
     if request.method == "POST":
         budget = request.POST.get('budget')
@@ -366,7 +375,7 @@ def like_movie(request, movie_id):
         return redirect('get_movie')
 
     except Movies.DoesNotExist:
-        return HttpResponse("Movie not found", status=404)
+        return render(request, 'errors/404.html', status=404)
 
 @login_required
 def watchlist(request):
