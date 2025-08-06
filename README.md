@@ -3,6 +3,8 @@
 MovieDB is a comprehensive Django-based web application that provides a complete movie management system with user authentication, premium features, AI-powered chat assistance, payment integration, and REST API endpoints. Built with modern web technologies and featuring a beautiful, responsive UI.
 
 ---
+## 👀 Visit Website
+🔗 Link: [(https://abhishyanth.pythonanywhere.com)] 
 
 ## ✨ Key Features
 
